@@ -2,6 +2,16 @@
 #ifndef _PRIORITY_QUEUE_H_
 #define _PRIORITY_QUEUE_H_
 #include <functional>
+#include <exception>
+
+class PriorityQueueEmpty : public std::exception {
+public:
+	char const* what() const override {
+		return "*** Priority queue is empty! ***";
+	}
+
+};
+
 
 /**
  * \brief Implementation of a priority queue
