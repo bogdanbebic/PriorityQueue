@@ -14,40 +14,30 @@ public:
 
 
 /**
- * \brief Implementation of a priority queue
+ * \brief Abstract implementation of a priority queue
  * \tparam T Type of stored elements
  * \tparam Compare Compare function object used in comparing elements
  */
 template<typename T, class Compare = std::less<T>>
-class PriorityQueue {	// TODO: implementation
+class PriorityQueue {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 public:
-	PriorityQueue();
-	PriorityQueue(const PriorityQueue & other);
-	PriorityQueue(PriorityQueue && other);
+	virtual T top() const = 0;
 
-	~PriorityQueue() = default;	// TODO: deallocation of implementation structures
+	virtual bool empty() const = 0;
+	virtual int size() const = 0;
 
-	PriorityQueue & operator=(const PriorityQueue & other);
-	PriorityQueue & operator=(PriorityQueue && other);
+	virtual void push(const T & elem) = 0;
+	virtual void push(T && elem) = 0;
+	virtual void pop() = 0;
+	
+	virtual void clear() = 0;
 
-	T top() const;
+	virtual ~PriorityQueue() = 0;
 
-	bool empty() const { return size_ == 0; }
-	int size() const { return size_; }
-
-	void push(const T & elem);
-	void push(T && elem);
-	void pop();
-
-private:
-	int size_;
 };
 
 template <typename T, class Compare>
-PriorityQueue<T, Compare>::PriorityQueue()
-	: size_(0)
-{
-	// empty body // TODO: init of implementation structures
-}
+PriorityQueue<T, Compare>::~PriorityQueue() = default;
+
 
 #endif

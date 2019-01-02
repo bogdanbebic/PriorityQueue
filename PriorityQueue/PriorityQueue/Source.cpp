@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <fstream>
+
 #include "PriorityQueue.h"
-
-
+#include "FibonacciHeap.h"
 
 class Program {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 public:
@@ -60,7 +62,7 @@ private:
 	};
 	std::string menu_msg_ = "Select menu option: ";
 
-	PriorityQueue<int> pq_;
+	// TODO: pq with compare function
 
 };
 
@@ -98,16 +100,53 @@ void PriorityQueueProgram::execute_option() {
 
 
 
+void load_test_ints_from_file(std::vector<int> & vec, const std::string & path_to_file, const int number_of_ints) {
+	std::ifstream is;
+	is.open(path_to_file);
+	vec.reserve(number_of_ints);
+	for (auto i = 0; i < number_of_ints; i++) {
+		int temp;
+		is >> temp;
+		vec.push_back(temp);
+	}
+
+	is.close();
+}
+
+void load_test_ints_to_vecs(
+	std::vector<int> & vec10, 
+	std::vector<int> & vec100, 
+	std::vector<int> & vec1000, 
+	std::vector<int> & vec10000, 
+	std::vector<int> & vec100000) 
+{
+	load_test_ints_from_file(vec10, "./test_ints/test_10.txt", 10);
+	load_test_ints_from_file(vec100, "./test_ints/test_100.txt", 100);
+	load_test_ints_from_file(vec1000, "./test_ints/test_1000.txt", 1000);
+	load_test_ints_from_file(vec10000, "./test_ints/test_10000.txt", 10000);
+	load_test_ints_from_file(vec100000, "./test_ints/test_100000.txt", 100000);
+}
+
+
+
 int main(int argc, char* argv[]) {
 	std::cout << "Hello, World!" << std::endl;
-	
-	PriorityQueueProgram program;
 
+	// Testing part
+	PriorityQueueProgram program;
 	while (program.is_running()) {
 		program.print_menu();
 		program.read_menu_option();
 		program.execute_option();
 	}
+
+	// Bencmarking part
+	PriorityQueue<int> *pq = new FibonacciHeap<int>; // min pq
+	std::vector<int> vec10, vec100, vec1000, vec10000, vec100000;
+	load_test_ints_to_vecs(vec10, vec100, vec1000, vec10000, vec100000);
+	// TODO: implement benchmarking
+
+	delete pq;
 
 	system("pause");
 	return 0;
