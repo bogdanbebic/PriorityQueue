@@ -4,7 +4,6 @@
 #include <fstream>
 
 #include "PriorityQueue.h"
-#include "FibonacciHeap.h"
 
 class Program {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 public:
@@ -62,8 +61,10 @@ private:
 	};
 	std::string menu_msg_ = "Select menu option: ";
 
-	// TODO: pq with compare function
-
+	PriorityQueue<int> pq_min_;
+	PriorityQueue<int, std::greater<>> pq_max_;
+	bool is_min_heap_ = true;
+	bool is_made_heap_ = false;
 };
 
 void PriorityQueueProgram::print_menu() {
@@ -77,18 +78,68 @@ void PriorityQueueProgram::print_menu() {
 
 void PriorityQueueProgram::execute_option() {
 	switch (menu_option_) {
-	case 1:	// TODO: Create (new) pq (delete old)
+	case 1:	// Create (new) pq (delete old)
+		pq_min_.clear();
+		pq_max_.clear();
+		os_ << "Select type of heap (1 for min, 0 for max): ";
+		is_ >> is_min_heap_;
+		is_made_heap_ = true;
 		break;
-	case 2:	// TODO: pq.empty()
+	case 2:	// pq.empty()
+		if (is_made_heap_) {
+			os_ << "Heap empty: ";
+			if (is_min_heap_) {
+				os_ << pq_min_.empty();
+			}
+			else {
+				os_ << pq_max_.empty();
+			}
+
+		}
+
 		break;
-	case 3:	// TODO: pq.top()
+	case 3:	// pq.top()
+		if (is_made_heap_) {
+			os_ << "Top element is: ";
+			if (is_min_heap_) {
+				os_ << pq_min_.top();
+			}
+			else {
+				os_ << pq_max_.top();
+			}
+
+		}
+
 		break;
-	case 4:	// TODO: pq.pop()
+	case 4:	// pq.pop()
+		if (is_made_heap_) {
+			if (is_min_heap_) {
+				pq_min_.pop();
+			}
+			else {
+				pq_max_.pop();
+			}
+
+		}
+
 		break;
-	case 5:	// TODO: pq.push()
+	case 5:	// pq.push()
+		if (is_made_heap_) {
+			os_ << "Input int: ";
+			int temp;
+			is_ >> temp;
+			if (is_min_heap_) {
+				pq_min_.push(temp);
+			}
+			else {
+				pq_max_.push(temp);
+			}
+
+		}
+
 		break;
 	case 0:
-		// TODO: deallocation of pq_
+		// deallocation of lists is implicit and implemented in STL
 		is_running_ = false;
 		break;
 	default:
@@ -141,12 +192,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Bencmarking part
-	PriorityQueue<int> *pq = new FibonacciHeap<int>; // min pq
+	PriorityQueue<int> pq; // min pq
 	std::vector<int> vec10, vec100, vec1000, vec10000, vec100000;
 	load_test_ints_to_vecs(vec10, vec100, vec1000, vec10000, vec100000);
 	// TODO: implement benchmarking
 
-	delete pq;
 
 	system("pause");
 	return 0;
