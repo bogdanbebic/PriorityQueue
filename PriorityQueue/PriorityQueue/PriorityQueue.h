@@ -22,6 +22,13 @@ public:
 template<typename T, class Compare = std::less<T>>
 class PriorityQueue {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 public:
+	PriorityQueue() = default;
+
+	~PriorityQueue() = default;
+
+	PriorityQueue(const PriorityQueue & other) = default;
+	PriorityQueue(PriorityQueue && other) = default;
+
 	T top() const {
 		return fibonacci_heap_.top();
 	}
@@ -45,6 +52,14 @@ public:
 	void pop() {
 		fibonacci_heap_.pop();
 	}
+
+	void merge(const PriorityQueue & other) {
+		fibonacci_heap_.merge(other.fibonacci_heap_);
+	}
+
+	void merge(PriorityQueue && other) {
+		fibonacci_heap_.merge(other.fibonacci_heap_);
+	}
 	
 	void clear() {
 		fibonacci_heap_.clear();
@@ -52,17 +67,14 @@ public:
 	
 private:
 
-	class FibonacciHeap {
+	class FibonacciHeap {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 	public:
 		FibonacciHeap() = default;
 
 		~FibonacciHeap() = default;
 
-		FibonacciHeap(const FibonacciHeap& other) = default;	// TODO: implement
-		FibonacciHeap(FibonacciHeap&& other) = default;	// TODO: implement
-
-		FibonacciHeap & operator=(const FibonacciHeap& other) = default;	// TODO: implement
-		FibonacciHeap & operator=(FibonacciHeap&& other) = default;	// TODO: implement
+		FibonacciHeap(const FibonacciHeap& other) = default;
+		FibonacciHeap(FibonacciHeap&& other) = default;
 
 		T top() const {
 			if (min_ == roots_.end()) {
@@ -73,6 +85,7 @@ private:
 		}
 
 		bool empty() const { return size_ == 0; }
+
 		int size() const { return size_; }
 
 		void push(const T& elem) {
@@ -110,11 +123,26 @@ private:
 				throw PriorityQueueEmpty();
 			}
 
-			// TODO: pop min_
+			roots_.splice(min_, min_->children);
+			min_ = roots_.erase(min_);
+			if (!roots_.empty()) {
+				consolidate();
+			}
+
+			size_--;
 		}
 
 		void merge(FibonacciHeap& other) {
-			// TODO: implement
+			auto it_min_old = min_;
+			if (min_ != roots_.end() || (other.min_ != other.roots_.end() && cmp_(min_->data, other.min_->data))) {
+				min_ = other.min_;
+			}
+
+			size_ += other.size();
+
+			roots_.splice(it_min_old, other.roots_);
+			other.size_ = 0;
+			other.min_ = other.roots_.end();
 		}
 
 		void clear() {
@@ -125,13 +153,25 @@ private:
 
 	private:
 
-		struct Node {
+		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 			explicit Node(T value) : data(value) {}
+
+			~Node() = default;
+			
+			Node(const Node& other) = default;
+			Node(Node&& other) = default;
+			
 			T data;
 			std::list<Node> children;
 			typename std::list<Node>::iterator current = children.end();
-			typename std::list<Node>::iterator father = children.end();
+			// typename std::list<Node>::iterator father = children.end();	// not used (possible implementation later)
+			// bool mark = false;	// not used (possible implementation later)
 		};
+
+
+		void consolidate() {
+			// TODO: implement
+		}
 
 		Compare cmp_ = Compare();
 

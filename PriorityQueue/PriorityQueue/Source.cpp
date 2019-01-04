@@ -76,6 +76,7 @@ void PriorityQueueProgram::print_menu() {
 	os_ << menu_msg_;
 }
 
+// TODO: implement convert from min_pq to max_pq and vice versa
 void PriorityQueueProgram::execute_option() {
 	try {
 		switch (menu_option_) {
@@ -88,7 +89,7 @@ void PriorityQueueProgram::execute_option() {
 			break;
 		case 2:	// pq.empty()
 			if (is_made_heap_) {
-				os_ << "Heap empty: ";
+				os_ << "Heap empty: " << std::boolalpha;
 				if (is_min_heap_) {
 					os_ << pq_min_.empty();
 				}
@@ -96,6 +97,7 @@ void PriorityQueueProgram::execute_option() {
 					os_ << pq_max_.empty();
 				}
 
+				os_ << std::endl;
 			}
 
 			break;
@@ -197,6 +199,8 @@ int main() {
 		program.read_menu_option();
 		program.execute_option();
 	}
+
+	// TODO: implement merge of different pq
 
 	// Bencmarking part
 	PriorityQueue<int> pq; // min pq
