@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <chrono>
 
 #include "PriorityQueue.h"
 
@@ -49,7 +50,7 @@ public:
 	void execute_option() override;
 
 private:
-	static const int menu_options = 6;
+	static const int menu_options = 7;
 	std::string menu_options_msgs_[menu_options] =
 	{
 		"Exit program",
@@ -57,7 +58,8 @@ private:
 		"Check if priority queue is empty",
 		"Get top element of priority queue",
 		"Pop element from priority queue",
-		"Push element to priority queue"
+		"Push element to priority queue",
+		"Convert heap"
 	};
 	std::string menu_msg_ = "Select menu option: ";
 
@@ -142,6 +144,28 @@ void PriorityQueueProgram::execute_option() {
 			}
 
 			break;
+		case 6:	// convert heap // BUG: does not convert
+			if (is_made_heap_) {
+				if (is_min_heap_) {
+					is_min_heap_ = false;
+					while (!pq_min_.empty()) {
+						pq_max_.push(pq_min_.top());
+						pq_min_.pop();
+					}
+
+				}
+				else {
+					is_min_heap_ = true;
+					while (!pq_max_.empty()) {
+						pq_min_.push(pq_max_.top());
+						pq_max_.pop();
+					}
+
+				}
+
+			}
+
+			break;
 		case 0:
 			// deallocation of lists is implicit and implemented in STL
 			is_running_ = false;
@@ -189,6 +213,22 @@ void load_test_ints_to_vecs(
 
 
 
+std::chrono::duration<double> measure_time(PriorityQueue<int> & pq, std::vector<int> vec) {
+	const auto start = std::chrono::system_clock::now();
+	for (auto & elem : vec) {
+		pq.push(elem);
+	}
+
+	while (!pq.empty()) {
+		pq.pop();
+	}
+
+	const auto end = std::chrono::system_clock::now();
+	const std::chrono::duration<double> elapsed = end - start;
+	return elapsed;
+}
+
+
 int main() {
 	std::cout << "Hello, World!" << std::endl;
 
@@ -206,7 +246,13 @@ int main() {
 	PriorityQueue<int> pq; // min pq
 	std::vector<int> vec10, vec100, vec1000, vec10000, vec100000;
 	load_test_ints_to_vecs(vec10, vec100, vec1000, vec10000, vec100000);
+
 	// TODO: implement benchmarking
+	std::cout << "Elapsed (sec) for " << vec10.size() << " elements: " << measure_time(pq, vec10).count() << std::endl;
+	std::cout << "Elapsed (sec) for " << vec100.size() << " elements: " << measure_time(pq, vec100).count() << std::endl;
+	// std::cout << "Elapsed (sec) for " << vec1000.size() << " elements: " << measure_time(pq, vec1000).count() << std::endl;
+	// std::cout << "Elapsed (sec) for " << vec10000.size() << " elements: " << measure_time(pq, vec10000).count() << std::endl;
+	// std::cout << "Elapsed (sec) for " << vec100000.size() << " elements: " << measure_time(pq, vec100000).count() << std::endl;
 
 	system("pause");
 	return 0;
