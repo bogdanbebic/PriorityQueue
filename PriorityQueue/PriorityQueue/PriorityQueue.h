@@ -155,22 +155,48 @@ private:
 
 		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 			explicit Node(T value) : data(value) {}
-
-			~Node() = default;
-			
-			Node(const Node& other) = default;
-			Node(Node&& other) = default;
 			
 			T data;
 			std::list<Node> children;
-			typename std::list<Node>::iterator current = children.end();
-			// typename std::list<Node>::iterator father = children.end();	// not used (possible implementation later)
+			// typename std::list<Node>::iterator father;	// not used (possible implementation later)
 			// bool mark = false;	// not used (possible implementation later)
 		};
 
 
 		void consolidate() {
-			// TODO: implement
+			std::vector<typename std::list<Node>::iterator> arr;
+			arr.reserve(size_);
+			for (auto i = 0; i < size_; i++) {
+				arr.push_back(roots_.end());
+			}
+
+			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
+				auto x = it;
+				int degree = it->children.size();
+				while (arr[degree] != roots_.end()) {
+					auto y = arr[degree];
+					if (cmp_(y->data, x->data)) {
+						std::swap(*x, *y);
+					}
+
+					x->children.insert(x->children.begin(), *y);
+					roots_.erase(y);
+
+					arr[degree] = roots_.end();
+					degree++;
+				}
+
+				arr[degree] = x;
+			}
+			
+			min_ = roots_.begin();
+			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
+				if (cmp_(it->data, min_->data)) {
+					min_ = it;
+				}
+
+			}
+			
 		}
 
 		Compare cmp_ = Compare();
