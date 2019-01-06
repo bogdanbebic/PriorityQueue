@@ -144,7 +144,7 @@ void PriorityQueueProgram::execute_option() {
 			}
 
 			break;
-		case 6:	// convert heap // BUG: does not convert
+		case 6:	// convert heap
 			if (is_made_heap_) {
 				if (is_min_heap_) {
 					is_min_heap_ = false;
