@@ -67,7 +67,21 @@ public:
 	void clear() {
 		fibonacci_heap_.clear();
 	}
-	
+
+	// OPERATIONS WITH STEPS COUNTER
+
+	void push(T elem, int &steps) {
+		fibonacci_heap_.push(elem, steps);
+	}
+
+	void pop(int &steps) {
+		fibonacci_heap_.pop(steps);
+	}
+
+	void merge(PriorityQueue & other, int &steps) {
+		fibonacci_heap_.merge(other.fibonacci_heap_);
+	}
+
 private:
 
 	class FibonacciHeap {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
@@ -159,6 +173,55 @@ private:
 			min_ = roots_.end();
 		}
 
+
+		// OPERATIONS WITH STEPS COUNTER
+
+		void push(T elem, int &steps) {
+			auto *new_node = new Node(elem);
+			steps++;
+			roots_.insert(min_, new_node);
+			size_++;
+			if (roots_.size() == 1) {
+				min_ = roots_.begin();
+				return;
+			}
+
+			steps++;
+			if (cmp_(elem, (*min_)->data)) {
+				--min_;
+			}
+
+		}
+
+		void pop(int &steps) {
+			if (min_ == roots_.end()) {
+				throw PriorityQueueEmpty();
+			}
+
+			steps += (*min_)->children.size();
+			roots_.splice(min_, (*min_)->children);
+			min_ = roots_.erase(min_);
+			if (!roots_.empty()) {
+				consolidate(steps);
+			}
+
+			size_--;
+		}
+
+		void merge(FibonacciHeap& other, int &steps) {
+			auto it_min_old = min_;
+			steps++;
+			if (min_ != roots_.end() || (other.min_ != other.roots_.end() && cmp_(min_->data, other.min_->data))) {
+				min_ = other.min_;
+			}
+
+			size_ += other.size();
+
+			steps += other.roots_.size();
+			roots_.splice(it_min_old, other.roots_);
+			other.clear();
+		}
+
 	private:
 
 		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
@@ -207,6 +270,48 @@ private:
 
 			}
 			
+		}
+
+
+		// OPERATION WHICH COUNTS STEPS
+
+		void consolidate(int &steps) {
+			std::vector<typename std::list<Node*>::iterator> arr;
+			auto size = static_cast<int>(log2(size_) + 2);
+			arr.reserve(size);
+			for (auto i = 0; i < size; i++) {
+				arr.push_back(roots_.end());
+			}
+
+			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
+				auto x = it;
+				int degree = (*it)->children.size();
+				while (arr[degree] != roots_.end()) {
+					auto y = arr[degree];
+					steps++;
+					if (cmp_((*y)->data, (*x)->data)) {
+						std::swap(*x, *y);
+					}
+
+					(*x)->children.insert((*x)->children.begin(), *y);
+					roots_.erase(y);
+
+					arr[degree] = roots_.end();
+					degree++;
+				}
+
+				arr[degree] = x;
+			}
+
+			min_ = roots_.begin();
+			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
+				steps++;
+				if (cmp_((*it)->data, (*min_)->data)) {
+					min_ = it;
+				}
+
+			}
+
 		}
 
 		Compare cmp_ = Compare();

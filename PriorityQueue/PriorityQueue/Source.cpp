@@ -236,6 +236,25 @@ std::chrono::duration<double> measure_time_pop(PriorityQueue<int> & pq) {
 	return elapsed;
 }
 
+int measure_steps_push(PriorityQueue<int> & pq, std::vector<int> vec) {
+	auto steps = 0;
+
+	for (auto & elem : vec) {
+		pq.push(elem, steps);
+	}
+
+	return steps;
+}
+
+int measure_steps_pop(PriorityQueue<int> & pq) {
+	auto steps = 0;
+
+	while (!pq.empty()) {
+		pq.pop(steps);
+	}
+
+	return steps;
+}
 
 void print_performance_table() {
 	PriorityQueue<int> pq; // min pq
@@ -247,27 +266,32 @@ void print_performance_table() {
 	std::cout << "Elems  | sec(push) |  sec(pop)  | steps(push) | steps(pop)" << std::endl;
 	std::cout << 10 << "     | " << measure_time_push(pq, vec10).count();
 	std::cout << " |  " << measure_time_pop(pq).count();
-	std::cout << " | "; // TODO: implement step count
+	std::cout << " | " << measure_steps_push(pq, vec10);
+	std::cout << "          | " << measure_steps_pop(pq);
 	std::cout << std::endl;
 
 	std::cout << 100 << "    | " << measure_time_push(pq, vec100).count();
 	std::cout << " |  " << measure_time_pop(pq).count();
-	std::cout << " | "; // TODO: implement step count
+	std::cout << " | " << measure_steps_push(pq, vec100);
+	std::cout << "         | " << measure_steps_pop(pq);
 	std::cout << std::endl;
 
 	std::cout << 1000 << "   | " << measure_time_push(pq, vec1000).count();
 	std::cout << " |  " << measure_time_pop(pq).count();
-	std::cout << " | "; // TODO: implement step count
+	std::cout << " | " << measure_steps_push(pq, vec1000);
+	std::cout << "        | " << measure_steps_pop(pq);
 	std::cout << std::endl;
 
 	std::cout << 10000 << "  | " << measure_time_push(pq, vec10000).count();
 	std::cout << " |  " << measure_time_pop(pq).count();
-	std::cout << " | "; // TODO: implement step count
+	std::cout << " | " << measure_steps_push(pq, vec10000);
+	std::cout << "       | " << measure_steps_pop(pq);
 	std::cout << std::endl;
 
 	std::cout << 100000 << " | " << measure_time_push(pq, vec100000).count();
 	std::cout << " |  " << measure_time_pop(pq).count();
-	std::cout << " | "; // TODO: implement step count
+	std::cout << " | " << measure_steps_push(pq, vec100000);
+	std::cout << "      | " << measure_steps_pop(pq);
 	std::cout << std::endl;
 }
 
