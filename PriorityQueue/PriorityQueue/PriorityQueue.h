@@ -4,6 +4,7 @@
 #include <functional>
 #include <exception>
 #include <list>
+#include <stack>
 
 class PriorityQueueEmpty : public std::exception {
 public:
@@ -18,6 +19,8 @@ public:
  * \brief Implementation of a priority queue using a Fibonacci heap
  * \tparam T Type of stored elements
  * \tparam Compare Compare function object used in comparing elements
+ * !!! WARNING !!!
+ * Does not have safe copy and move constructors and operations
  */
 template<typename T, class Compare = std::less<T>>
 class PriorityQueue {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
@@ -143,8 +146,7 @@ private:
 			size_ += other.size();
 
 			roots_.splice(it_min_old, other.roots_);
-			other.size_ = 0;
-			other.min_ = other.roots_.end();
+			other.clear();
 		}
 
 		void clear() {
@@ -162,12 +164,7 @@ private:
 		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 			explicit Node(T value) : data(value) {}
 
-			~Node() {
-				for (auto & child : children) {
-					delete child;
-				}
-
-			}
+			~Node();
 
 			T data;
 			std::list<Node*> children;
@@ -224,5 +221,42 @@ private:
 	FibonacciHeap fibonacci_heap_;
 
 };	// end class PriorityQueue
+
+
+template <typename T, class Compare>
+PriorityQueue<T, Compare>::FibonacciHeap::Node::~Node() {
+	struct NodePostorder {
+		NodePostorder(Node* node, const bool to_delete_node)
+			: data(node), to_delete(to_delete_node) {}
+		Node *data;
+		bool to_delete;
+	};
+
+	std::stack<NodePostorder> s;
+
+	for (auto & child : children) {
+		NodePostorder node(child, false);
+		s.push(node);
+	}
+
+	while (!s.empty()) {
+		NodePostorder node = s.top();
+		s.pop();
+		if (node.to_delete) {
+			delete node.data;
+		}
+		else {
+			node.to_delete = true;
+			s.push(node);
+			for (auto & elem : children) {
+				NodePostorder node_postorder(elem, false);
+				s.push(node_postorder);
+			}
+
+		}
+
+	}
+
+}
 
 #endif
