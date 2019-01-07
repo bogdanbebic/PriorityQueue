@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "PriorityQueue.h"
+#include <iomanip>
 
 class Program {  // NOLINT(hicpp-special-member-functions, cppcoreguidelines-special-member-functions)
 public:
@@ -78,7 +79,7 @@ void PriorityQueueProgram::print_menu() {
 	os_ << menu_msg_;
 }
 
-// TODO: implement convert from min_pq to max_pq and vice versa
+
 void PriorityQueueProgram::execute_option() {
 	try {
 		switch (menu_option_) {
@@ -213,12 +214,19 @@ void load_test_ints_to_vecs(
 
 
 
-std::chrono::duration<double> measure_time(PriorityQueue<int> & pq, std::vector<int> vec) {
+std::chrono::duration<double> measure_time_push(PriorityQueue<int> & pq, std::vector<int> vec) {
 	const auto start = std::chrono::system_clock::now();
 	for (auto & elem : vec) {
 		pq.push(elem);
 	}
+	
+	const auto end = std::chrono::system_clock::now();
+	const std::chrono::duration<double> elapsed = end - start;
+	return elapsed;
+}
 
+std::chrono::duration<double> measure_time_pop(PriorityQueue<int> & pq) {
+	const auto start = std::chrono::system_clock::now();
 	while (!pq.empty()) {
 		pq.pop();
 	}
@@ -226,6 +234,41 @@ std::chrono::duration<double> measure_time(PriorityQueue<int> & pq, std::vector<
 	const auto end = std::chrono::system_clock::now();
 	const std::chrono::duration<double> elapsed = end - start;
 	return elapsed;
+}
+
+
+void print_performance_table() {
+	PriorityQueue<int> pq; // min pq
+	std::vector<int> vec10, vec100, vec1000, vec10000, vec100000;
+	load_test_ints_to_vecs(vec10, vec100, vec1000, vec10000, vec100000);
+
+	std::cout << std::setprecision(7) << std::fixed;
+
+	std::cout << "Elems  | sec(push) |  sec(pop)  | steps(push) | steps(pop)" << std::endl;
+	std::cout << 10 << "     | " << measure_time_push(pq, vec10).count();
+	std::cout << " |  " << measure_time_pop(pq).count();
+	std::cout << " | "; // TODO: implement step count
+	std::cout << std::endl;
+
+	std::cout << 100 << "    | " << measure_time_push(pq, vec100).count();
+	std::cout << " |  " << measure_time_pop(pq).count();
+	std::cout << " | "; // TODO: implement step count
+	std::cout << std::endl;
+
+	std::cout << 1000 << "   | " << measure_time_push(pq, vec1000).count();
+	std::cout << " |  " << measure_time_pop(pq).count();
+	std::cout << " | "; // TODO: implement step count
+	std::cout << std::endl;
+
+	std::cout << 10000 << "  | " << measure_time_push(pq, vec10000).count();
+	std::cout << " |  " << measure_time_pop(pq).count();
+	std::cout << " | "; // TODO: implement step count
+	std::cout << std::endl;
+
+	std::cout << 100000 << " | " << measure_time_push(pq, vec100000).count();
+	std::cout << " | " << measure_time_pop(pq).count();
+	std::cout << " | "; // TODO: implement step count
+	std::cout << std::endl;
 }
 
 
@@ -240,20 +283,9 @@ int main() {
 		program.execute_option();
 	}
 
-	// TODO: implement merge of different pq
-
 	// Bencmarking part
-	PriorityQueue<int> pq; // min pq
-	std::vector<int> vec10, vec100, vec1000, vec10000, vec100000;
-	load_test_ints_to_vecs(vec10, vec100, vec1000, vec10000, vec100000);
-
-	// TODO: implement benchmarking
-	std::cout << "Elapsed (sec) for " << vec10.size() << " elements: " << measure_time(pq, vec10).count() << std::endl;
-	std::cout << "Elapsed (sec) for " << vec100.size() << " elements: " << measure_time(pq, vec100).count() << std::endl;
-	// std::cout << "Elapsed (sec) for " << vec1000.size() << " elements: " << measure_time(pq, vec1000).count() << std::endl;
-	// std::cout << "Elapsed (sec) for " << vec10000.size() << " elements: " << measure_time(pq, vec10000).count() << std::endl;
-	// std::cout << "Elapsed (sec) for " << vec100000.size() << " elements: " << measure_time(pq, vec100000).count() << std::endl;
-
+	print_performance_table();
+	
 	system("pause");
 	return 0;
 }

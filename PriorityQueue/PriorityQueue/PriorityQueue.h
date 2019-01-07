@@ -81,7 +81,7 @@ private:
 				throw PriorityQueueEmpty();
 			}
 
-			return min_->data;
+			return (*min_)->data;
 		}
 
 		bool empty() const { return size_ == 0; }
@@ -89,7 +89,7 @@ private:
 		int size() const { return size_; }
 
 		void push(const T& elem) {
-			auto new_node = Node(elem);
+			auto *new_node = new Node(elem);
 			roots_.insert(min_, new_node);
 			size_++;
 			if (roots_.size() == 1) {
@@ -97,14 +97,14 @@ private:
 				return;
 			}
 
-			if (cmp_(elem, min_->data)) {
+			if (cmp_(elem, (*min_)->data)) {
 				--min_;
 			}
 
 		}
 
 		void push(T&& elem) {
-			auto new_node = Node(elem);
+			auto *new_node = new Node(elem);
 			roots_.insert(min_, new_node);
 			size_++;
 			if (roots_.size() == 1) {
@@ -123,7 +123,7 @@ private:
 				throw PriorityQueueEmpty();
 			}
 
-			roots_.splice(min_, min_->children);
+			roots_.splice(min_, (*min_)->children);
 			min_ = roots_.erase(min_);
 			if (!roots_.empty()) {
 				consolidate();
@@ -146,6 +146,7 @@ private:
 		}
 
 		void clear() {
+			// TODO: destruct
 			roots_.clear();
 			size_ = 0;
 			min_ = roots_.end();
@@ -155,31 +156,33 @@ private:
 
 		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 			explicit Node(T value) : data(value) {}
-			
+	
 			T data;
-			std::list<Node> children;
+			std::list<Node*> children;
 			// typename std::list<Node>::iterator father;	// not used (possible implementation later)
 			// bool mark = false;	// not used (possible implementation later)
 		};
 
+		// TODO: imlement destructor
 
 		void consolidate() {
-			std::vector<typename std::list<Node>::iterator> arr;
-			arr.reserve(size_);
-			for (auto i = 0; i < size_; i++) {
+			std::vector<typename std::list<Node*>::iterator> arr;
+			auto size = static_cast<int>(log2(size_) + 2);
+			arr.reserve(size);
+			for (auto i = 0; i < size; i++) {
 				arr.push_back(roots_.end());
 			}
 
 			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
 				auto x = it;
-				int degree = it->children.size();
+				int degree = (*it)->children.size();
 				while (arr[degree] != roots_.end()) {
 					auto y = arr[degree];
-					if (cmp_(y->data, x->data)) {
+					if (cmp_((*y)->data, (*x)->data)) {
 						std::swap(*x, *y);
 					}
 
-					x->children.insert(x->children.begin(), *y);
+					(*x)->children.insert((*x)->children.begin(), *y);
 					roots_.erase(y);
 
 					arr[degree] = roots_.end();
@@ -191,7 +194,7 @@ private:
 			
 			min_ = roots_.begin();
 			for (auto it = roots_.begin(); it != roots_.end(); ++it) {
-				if (cmp_(it->data, min_->data)) {
+				if (cmp_((*it)->data, (*min_)->data)) {
 					min_ = it;
 				}
 
@@ -203,8 +206,8 @@ private:
 
 		int size_ = 0;
 
-		std::list<Node> roots_;
-		typename std::list<Node>::iterator min_ = roots_.end();
+		std::list<Node*> roots_;
+		typename std::list<Node*>::iterator min_ = roots_.end();
 
 	}; // end class FibonacciHeap
 
