@@ -71,7 +71,9 @@ private:
 	public:
 		FibonacciHeap() = default;
 
-		~FibonacciHeap() = default;
+		~FibonacciHeap() {
+			clear();
+		}
 
 		FibonacciHeap(const FibonacciHeap& other) = default;
 		FibonacciHeap(FibonacciHeap&& other) = default;
@@ -146,7 +148,10 @@ private:
 		}
 
 		void clear() {
-			// TODO: destruct
+			for (auto & root : roots_) {
+				delete root;
+			}
+
 			roots_.clear();
 			size_ = 0;
 			min_ = roots_.end();
@@ -156,14 +161,19 @@ private:
 
 		struct Node {  // NOLINT(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 			explicit Node(T value) : data(value) {}
-	
+
+			~Node() {
+				for (auto & child : children) {
+					delete child;
+				}
+
+			}
+
 			T data;
 			std::list<Node*> children;
 			// typename std::list<Node>::iterator father;	// not used (possible implementation later)
 			// bool mark = false;	// not used (possible implementation later)
 		};
-
-		// TODO: imlement destructor
 
 		void consolidate() {
 			std::vector<typename std::list<Node*>::iterator> arr;

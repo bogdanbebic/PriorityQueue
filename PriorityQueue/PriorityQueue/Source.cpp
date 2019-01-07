@@ -266,7 +266,7 @@ void print_performance_table() {
 	std::cout << std::endl;
 
 	std::cout << 100000 << " | " << measure_time_push(pq, vec100000).count();
-	std::cout << " | " << measure_time_pop(pq).count();
+	std::cout << " |  " << measure_time_pop(pq).count();
 	std::cout << " | "; // TODO: implement step count
 	std::cout << std::endl;
 }
